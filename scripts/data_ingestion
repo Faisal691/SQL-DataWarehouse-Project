@@ -1,0 +1,36 @@
+import sqlite3
+import pandas as pd
+
+# 1. Read the fresh CSV data
+crm_cust_info = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_crm\cust_info.csv')
+crm_prd_info = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_crm\prd_info.csv')
+crm_sales_details = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_crm\sales_details.csv')
+erp_cust_az12 = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv')
+erp_loc_a101 = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv')
+erp_px_cat_g1v2 = pd.read_csv('D:\SQL DataWarehouse Project\sql-data-warehouse-project\datasets\source_erp\PX_CAT_G1V2.csv')
+
+# 2. Connect to your SQLite database
+conn = sqlite3.connect('datawarehouse.db')
+cursor = conn.cursor()
+
+# 3. Truncate the table manually (Deletes all rows, keeps schema)
+cursor.execute('DELETE FROM bronze_crm_cust_info;')
+cursor.execute('delete from bronze_crm_prd_info;')
+cursor.execute('delete from bronze_crm_sales_details;')
+cursor.execute('delete from bronze_erp_cust_az12;')
+cursor.execute('delete from bronze_erp_loc_a101;')
+cursor.execute('delete from bronze_erp_px_cat_g1v2;')
+conn.commit()  # Save the deletion
+
+# 4. Load the fresh data using append
+crm_cust_info.to_sql('bronze_crm_cust_info', conn, if_exists='append', index=False)
+crm_prd_info.to_sql('bronze_crm_prd_info', conn, if_exists='append', index=False)
+crm_sales_details.to_sql('bronze_crm_sales_details', conn, if_exists='append', index=False)
+erp_cust_az12.to_sql('bronze_erp_cust_az12', conn, if_exists='append', index=False)
+erp_loc_a101.to_sql('bronze_erp_loc_a101', conn, if_exists='append', index=False)
+erp_px_cat_g1v2.to_sql('bronze_erp_px_cat_g1v2', conn, if_exists='append', index=False)
+
+# 5. Close connections
+cursor.close()
+conn.close()
+print("All tables successfully truncated and reloaded!")
